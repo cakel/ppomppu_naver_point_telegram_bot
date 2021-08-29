@@ -7,19 +7,33 @@ from _logger import logger
 chat_id_list = eval(config["TELEGRAM_DEFAULT_CHAT_ID"])
 bot = telepot.Bot(config["TELEGRAM_TOKEN"])
 
+
 def initialize_listening():
     MessageLoop(bot, handle).run_as_thread()
 
+
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
-    if chat_id not in chat_id_list:
+    if chat_id in chat_id_list and \
+            msg is not None and \
+            'text' in msg.keys() and \
+            msg['text'] == 'quit':
+        bot.sendMessage(
+            chat_id, "...Unsubscribed... To subscribe, type anything")
+        chat_id_list.remove(chat_id)
+    else:
         chat_id_list.append(chat_id)
-    logger.info("/".join([str(msg)]))
+        bot.sendMessage(
+            chat_id, "...Subscribed... To unsubscribe, type 'quit'")
+    logger.info(str(msg))
+
 
 def send_message_from_result_list(result_list):
     for result_item in result_list:
-        send_message(result_item["no"], result_item["title"], result_item["link"])
+        send_message(result_item["no"],
+                     result_item["title"], result_item["link"])
     return
+
 
 def send_message(no, title, link):
     for chat_id in chat_id_list:
@@ -28,8 +42,8 @@ def send_message(no, title, link):
         title = title.replace("]", "")
         title = title.replace("(", "")
         title = title.replace(")", "")
-        msg_markdown = "No: {} [{}]({})".format(no,title,link)
-        logger.info("Send msg:{} to chat_id: {}".format(chat_id, msg))
+        msg_markdown = "No: {} [{}]({})".format(no, title, link)
+        logger.info("Send msg:'{}' to chat_id: {}".format(msg, chat_id))
         bot.sendMessage(chat_id, msg_markdown, parse_mode="Markdown")
 
 
