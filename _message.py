@@ -11,6 +11,11 @@ bot = telepot.Bot(config["TELEGRAM_TOKEN"])
 def initialize_listening():
     MessageLoop(bot, handle).run_as_thread()
 
+    if chat_id_list is not None and \
+            isinstance(chat_id_list, list) and \
+            chat_id_list != []:
+        for chat_id in chat_id_list:
+            bot.sendMessage(chat_id, "Bot is rebooted...")
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
