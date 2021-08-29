@@ -1,0 +1,9 @@
+beautifulsoup4
+fake-useragent
+lxml
+python-dotenv
+requests
+telepot
+--only-binary=:ALL:
+--no-binary=telepot
+--no-binary="fake-useragent"
