@@ -5,7 +5,8 @@ Searching ppomppu (네이버) and sending result with Telegram bot
 * Python 3
 
 # How to install
-## 1. Edit `.env` file
+## 1. Create or inject `.env` file using `config.env`
+* `FULL_URL` is ppomppu URL for searching Naver Point(네이버 페이 포인트) article. It's almost default.
 * `TELEGRAM_TOKEN` is bot id created by Telegram's bot father (https://t.me/botfather)
 * `TELEGRAM_DEFAULT_CHAT_ID` is default Chat ID if you have known chat id from created bot
 # (Option) 2. Make virtual running environment

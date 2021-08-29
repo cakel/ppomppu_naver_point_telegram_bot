@@ -7,3 +7,4 @@ telepot
 --only-binary=:ALL:
 --no-binary=telepot
 --no-binary="fake-useragent"
+--no-binary=dotenv_values
