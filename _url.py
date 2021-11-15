@@ -7,19 +7,20 @@ from fake_useragent import UserAgent
 
 def fetch_html_to_string(urlstring: None) -> str:
     ua = UserAgent()
-    ret = ""
+    retString = ""
     if urlstring is None:
         urlstring = config["FULL_URL"]
 
     header = {'User-Agent': str(ua.chrome)}
     try:
         ret = requests.get(urlstring, headers=header)
+        retString = str(ret.text)
     except Exception as e:
         logger.error("{}".format(e))
     else:
         logger.debug("Fetched {}".format(urlstring))
 
-    return ret.text
+    return retString
 
 
 def get_record_list_info_from_html(htmlstring: str) -> list:

@@ -39,6 +39,7 @@ def mainloop():
         sleep(10) # 10 Second
 
 if __name__ == "__main__":
+    logger.info("=== Program Loop Start ===")
     initialize_listening()
     mainloop()
     pass
