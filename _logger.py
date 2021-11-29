@@ -1,16 +1,19 @@
 from logging.handlers import RotatingFileHandler
 import logging
+import os
 import sys
+import gzip
 
-class GZipRotator:
-    def __call__(self, source, dest):
-        os.rename(source, dest)
-        f_in = open(dest, 'rb')
-        f_out = gzip.open("%s.gz" % dest, 'wb')
-        f_out.writelines(f_in)
-        f_out.close()
-        f_in.close()
-        os.remove(dest)
+def namer(name):
+    return name + ".gz"
+
+def rotator(source, dest):
+    with open(source, "rb") as sf:
+        data = sf.read()
+        compressed = gzip.compress(data)
+        with open(dest, "wb") as df:
+            df.write(compressed)
+    os.remove(source)
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -23,7 +26,9 @@ stdout_handler.setFormatter(formatter)
 file_handler = RotatingFileHandler('logs.log', maxBytes=1024*1024*4, backupCount=5)
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
-file_handler.rotator = GZipRotator()
+file_handler.rotator = rotator
+file_handler.namer = namer
+
 
 logger.addHandler(file_handler)
 logger.addHandler(stdout_handler)
