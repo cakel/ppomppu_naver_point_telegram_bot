@@ -31,13 +31,19 @@ def get_record_list_info_from_html(htmlstring: str) -> list:
     no = 0
     result_item = {}
     result_list = []
+    table_tr_list = []
 
     soup = BeautifulSoup(htmlstring, "lxml")
-    table_tr_list = soup.find(id="revolution_main_table").find_all("tr")
-    for table_tr_item in table_tr_list:
-        record_item = table_tr_item.find_all("td")
+    try:
+        table_tr_list = soup.find(id="revolution_main_table").find_all("tr")
+    except Exception as e:
+        logger.warning("find_all(revolution_main_table) has problem...{}".format(str(e)))
 
+
+    for table_tr_item in table_tr_list:
         try:
+            record_item = table_tr_item.find_all("td")
+
             if len(record_item) > 4 and \
                     len(record_item[3].contents) > 4 and \
                     len(record_item[3].contents[3]) > 0:
@@ -54,7 +60,7 @@ def get_record_list_info_from_html(htmlstring: str) -> list:
                     logger.debug("Appending...{}".format(result_item))
                     result_list.append(result_item)
         except Exception as e:
-            logger.warning(e)
+            logger.warning('find_all("td") and extracting data was failed...{}'.format(str(e)))
 
     return result_list
 
