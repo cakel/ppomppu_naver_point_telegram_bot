@@ -45,11 +45,17 @@ def get_record_list_info_from_html(htmlstring: str) -> list:
             record_item = table_tr_item.find_all("td")
 
             if len(record_item) > 4 and \
-                    len(record_item[3].contents) > 4 and \
-                    len(record_item[3].contents[3]) > 0:
-                title = record_item[3].contents[3].text
-                link = "{}/{}".format(DOMAIN_DIR_URL,
-                                      (record_item[3].contents[3].attrs['href']))
+                    len(record_item[2].contents) > 4:
+
+                if record_item[2].contents[3].name == 'img': # '인기/HOT' Exists
+                    title = record_item[2].contents[5].text
+                    link = "{}/{}".format(DOMAIN_DIR_URL,
+                                      (record_item[2].contents[5].attrs['href']))
+                else:   # '인기/HOT' Not Exists
+                    title = record_item[2].contents[3].text
+                    link = "{}/{}".format(DOMAIN_DIR_URL,
+                                        (record_item[2].contents[3].attrs['href']))
+
                 no = link.split("no=")[1]
                 if "네이버" in title:
                     result_item = {
