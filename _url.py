@@ -1,9 +1,10 @@
+from operator import contains
 from _logger import logger
 from _config import config
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-
+from urllib.parse import parse_qs, urlparse
 
 def fetch_html_to_string(urlstring: None) -> str:
     ua = UserAgent()
@@ -25,50 +26,34 @@ def fetch_html_to_string(urlstring: None) -> str:
 
 def get_record_list_info_from_html(htmlstring: str) -> list:
     DOMAIN_DIR_URL = "/".join(config["FULL_URL"].split("/")[:-1])
-
     title = ''
     link = ''
     no = 0
     result_item = {}
     result_list = []
-    table_tr_list = []
 
-    soup = BeautifulSoup(htmlstring, "lxml")
     try:
-        table_tr_list = soup.find(id="revolution_main_table").find_all("tr")
-    except Exception as e:
-        logger.warning("find_all(revolution_main_table) has problem...{}".format(str(e)))
-
-
-    for table_tr_item in table_tr_list:
-        try:
-            record_item = table_tr_item.find_all("td")
-
-            if len(record_item) > 4 and \
-                    len(record_item[2].contents) > 4:
-
-                if record_item[2].contents[3].name == 'img': # '인기/HOT' Exists
-                    title = record_item[2].contents[5].text
-                    link = "{}/{}".format(DOMAIN_DIR_URL,
-                                      (record_item[2].contents[5].attrs['href']))
-                else:   # '인기/HOT' Not Exists
-                    title = record_item[2].contents[3].text
-                    link = "{}/{}".format(DOMAIN_DIR_URL,
-                                        (record_item[2].contents[3].attrs['href']))
-
-                no = link.split("no=")[1]
-                if "네이버" in title:
-                    result_item = {
-                        "no": no,
-                        "title": title,
-                        "link": link
-                    }
-                    logger.debug("Appending...{}".format(result_item))
-                    result_list.append(result_item)
-        except Exception as e:
-            logger.warning('find_all("td") and extracting data was failed...{}'.format(str(e)))
-
-    return result_list
+        soup = BeautifulSoup(htmlstring, "lxml")
+        a_item_list = soup.select("a")
+        filtered_naver_a_item_list=filter(lambda x: "네이버" in x.text, a_item_list)
+    except Exception as _e:
+        logger.warn("Parsing HTML was failed : "+ str(_e))
+    else:
+        for a_item in filtered_naver_a_item_list:
+            # https://stackoverflow.com/questions/5074803/retrieving-parameters-from-a-url
+            parsed_url=urlparse(a_item['href'])
+            no = parse_qs(parsed_url.query)['no'][0]
+            title = a_item.text
+            link = "/".join([DOMAIN_DIR_URL, a_item['href']])
+            result_item = {
+                "no": no,
+                "title": title,
+                "link": link
+            }
+            logger.debug("Appending...{}".format(result_item))
+            result_list.append(result_item)
+    finally:
+        return result_list
 
 def get_sending_list_from_record(existing_result_list, retrieved_result_list):
     '''
